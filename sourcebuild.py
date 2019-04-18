@@ -8,9 +8,9 @@ subjects_dir = "/home/jeff/freesurfer/subjects/"
 proc_dir = "/home/jeff/reftest/proc/"
 
 cov = mne.read_cov("{dir}empty_ref-cov.fif".format(dir=proc_dir))
-src_std = 10
+src_std = 4
 src_mean = 0
-src_num = 6
+src_num = 3
 
 for sub in subjs:
     for run in runs:
@@ -35,7 +35,9 @@ for sub in subjs:
         fwd = mne.make_forward_solution(raw.info,trans,all_source,bem,src_filt=False,ref_meg=True,n_jobs=8)
 
         out_data = np.zeros((src_num,len(raw.times)))
-        out_data[0,] = np.sin(np.arange(len(raw.times))/500)*1e-2
+        out_data[0,] = np.sin(np.arange(len(raw.times))/100+15)*2e-3
+        out_data[1,] = np.sin(np.arange(len(raw.times))/20+50)*2e-3
+        out_data[2,] = np.sin(np.arange(len(raw.times))/50)*2e-3
         print((np.linalg.norm(rr[0,])))
         all_data = np.concatenate((out_data,stc.data))
         vertices = [np.arange(src_num)]+stc.vertices
@@ -50,25 +52,24 @@ for sub in subjs:
 
 
 
-# plot
-# lh_surf = in_source[0]
-# # extract left cortical surface vertices, triangle faces, and surface normals
-# x1, y1, z1 = lh_surf['rr'].T
-# faces = lh_surf['use_tris']
-# normals = lh_surf['nn']
-# # normalize for mayavi
-# normals /= np.sum(normals * normals, axis=1)[:, np.newaxis]
-#
-# # extract left cerebellum cortex source positions
-# x2, y2, z2 = out_source[0]['rr'][out_source[0]['inuse'].astype(bool)].T
-#
-# # open a 3d figure in mayavi
-# mlab.figure(1, bgcolor=(0, 0, 0))
-#
-# # plot the left cortical surface
-# mesh = mlab.pipeline.triangular_mesh_source(x1, y1, z1, faces)
-# mesh.data.point_data.normals = normals
-# mlab.pipeline.surface(mesh, color=3 * (0.7,))
-#
-# # plot the outer sources
-# mlab.points3d(x2, y2, z2, color=(1, 1, 0), scale_factor=0.1)
+#plot
+lh_surf = in_source[0]
+# extract left cortical surface vertices, triangle faces, and surface normals
+x1, y1, z1 = lh_surf['rr'].T
+faces = lh_surf['use_tris']
+normals = lh_surf['nn']
+# normalize for mayavi
+normals /= np.sum(normals * normals, axis=1)[:, np.newaxis]
+
+x2, y2, z2 = out_source[0]['rr'][out_source[0]['inuse'].astype(bool)].T
+
+# open a 3d figure in mayavi
+mlab.figure(1, bgcolor=(0, 0, 0))
+
+# plot the outer sources
+mlab.points3d(x2, y2, z2, color=(1, 1, 0), scale_factor=0.1)
+
+# plot the left cortical surface
+mesh = mlab.pipeline.triangular_mesh_source(x1, y1, z1, faces)
+mesh.data.point_data.normals = normals
+mlab.pipeline.surface(mesh, color=3 * (0.7,))
