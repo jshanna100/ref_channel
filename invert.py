@@ -1,9 +1,11 @@
 import mne
 import numpy as np
 
-subjs = ["ATT_10"]
-runs = ["1"]
-proc_dir = "/home/jeff/reftest/proc/"
+subjs = ["ATT_10","ATT_11","ATT_12","ATT_13","ATT_14"]
+runs = ["1","2","3","4","5"]
+# subjs = ["ATT_14"]
+# runs = ["3","4","5"]
+proc_dir = "/media/hdd/jeff/reftest/proc/"
 
 for sub in subjs:
     for run in runs:

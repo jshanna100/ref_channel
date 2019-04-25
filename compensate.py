@@ -14,6 +14,7 @@ def compensate(raw,weights=None,direction=1):
         Y_pred = estimator.fit(
         raw[ref_picks][0].T,raw[meg_picks][0].T).predict(raw[ref_picks][0].T)
         raw._data[meg_picks] -= direction*Y_pred.T
+        return estimator
     else:
         meg_picks = mne.pick_types(raw.info,meg=True,ref_meg=False,exclude=[])
         ref_picks = mne.pick_channels(raw.ch_names,weights["comp_names"])

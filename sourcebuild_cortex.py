@@ -1,16 +1,18 @@
 import mne
 import numpy as np
 
-subjs = ["ATT_10"]
-runs = ["rest","audio","visselten","visual","zaehlen"]
-runs = ["1"]
+subjs = ["ATT_10","ATT_11","ATT_12","ATT_13","ATT_14"]
+runs = ["1","2","3","4","5"]
+# subjs = ["ATT_14"]
+# runs = ["3","4","5"]
+
 subjects_dir = "/home/jeff/freesurfer/subjects/"
-proc_dir = "/home/jeff/reftest/proc/"
+proc_dir = "/media/hdd/jeff/reftest/proc/"
 
 for sub in subjs:
     trans = "{dir}nc_{sub}-trans.fif".format(dir=proc_dir,sub=sub)
     src = mne.setup_source_space("nc_"+sub,surface="white", add_dist=True,
-                                 subjects_dir=subjects_dir,n_jobs=8)
+                                 subjects_dir=subjects_dir,n_jobs=8,spacing="oct5")
     src.save("{dir}nc_{sub}-src.fif".format(dir=proc_dir,sub=sub),overwrite=True)
     bem_model = mne.make_bem_model("nc_"+sub, conductivity=[0.3],
                                    subjects_dir=subjects_dir)
