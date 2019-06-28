@@ -2,9 +2,8 @@ import mne
 import numpy as np
 
 subjs = ["ATT_10","ATT_11","ATT_12","ATT_13","ATT_14"]
-runs = ["1","2","3","4","5"]
-# subjs = ["ATT_14"]
-# runs = ["3","4","5"]
+runs = ["2","3","4","5"]
+
 
 subjects_dir = "/home/jeff/freesurfer/subjects/"
 proc_dir = "/media/hdd/jeff/reftest/proc/"
@@ -27,7 +26,7 @@ for sub in subjs:
     bem = mne.read_bem_solution("{dir}nc_{sub}-bem.fif".format(
                            dir=proc_dir,sub=sub))
     for run in runs:
-        raw = mne.io.Raw("{dir}nc_{sub}_{run}_hand_ica-raw.fif".format(
+        raw = mne.io.Raw("{dir}{sub}_{run}_ica-raw.fif".format(
                          dir=proc_dir,sub=sub,run=run))
         fwd = mne.make_forward_solution(raw.info, trans=trans, src=src, bem=bem,
                                         meg=True, mindist=5.0, n_jobs=4)

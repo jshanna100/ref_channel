@@ -1,27 +1,32 @@
 import mne
 import numpy as np
+import pickle
+from compensate import compensate
 
-# Convert from BTI format to MNE-Python
+raw_dir ="/home/jeff/ATT_dat/proc/"
+proc_dir = "/home/jeff/reftest/proc/"
+subjs = ["ATT_10","ATT_11","ATT_12","ATT_13","ATT_14"]
+runs = ["2","3","4","5"]
 
-base_dir ="/home/jeff/reftest/"
-raw_dir = base_dir+"raw/"
-proc_dir = base_dir+"proc/"
-
-l_freq=None
-h_freq=None
-notches = [50, 62, 100, 150, 200]
-breadths = np.array([1.5, 0.5, 0.5, 0.5, 0.5])
-
-subjs = ["zw","w"]
-runs = ["first","second"]
+with open("/home/jeff/reftest/bin/compsup1","rb") as f:
+    compsup1 = pickle.load(f)
 
 for sub in subjs:
     for run in runs:
-        workfile = "{dir}{s}/{r}/c,rfhp1.0Hz".format(dir=raw_dir,s=sub,r=run)
-        raw = mne.io.read_raw_bti(workfile,preload=True, head_shape_fname=None,
-                                     rename_channels=False)
+        workfile = "{dir}nc_{s}_{r}_hand-raw.fif".format(dir=raw_dir,s=sub,r=run)
+        raw = mne.io.Raw(workfile)
+        compensate(raw,weights=compsup1["digital"],direction=-1)
+        compensate(raw)
         picks = mne.pick_types(raw.info,meg=True,ref_meg=True) # get channels we want to filter
-        raw.filter(l_freq,h_freq,picks=picks,n_jobs="cuda")
-        raw.notch_filter(notches,n_jobs="cuda",picks=picks, notch_widths=breadths)
-        raw = raw.resample(200,n_jobs="cuda")
-        raw.save("{dir}{sub}_{run}-raw.fif".format(dir=proc_dir,sub=sub,run=run))
+        raw.save("{dir}{sub}_{run}-raw.fif".format(dir=proc_dir,sub=sub,run=run),overwrite=True)
+
+        ica = mne.preprocessing.ICA(n_components=0.999,allow_ref_meg=True,
+                                    max_iter=10000,method="picard")
+        # ica.fit(raw,picks=picks)
+        # ica.save("{dir}{sub}_{run}-ica.fif".format(dir=proc_dir,sub=sub,run=run))
+
+        picks = mne.pick_types(raw.info,meg=False,ref_meg=True)
+        ica = mne.preprocessing.ICA(n_components=0.99,allow_ref_meg=True,
+                                    max_iter=10000,method="picard")
+        ica.fit(raw,picks=picks)
+        ica.save("{dir}{sub}_{run}_ref-ica.fif".format(dir=proc_dir,sub=sub,run=run))

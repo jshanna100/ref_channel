@@ -1,12 +1,18 @@
 import mne
 import numpy as np
 import pickle
+from compensate import compensate
 
 subjs = ["ATT_10","ATT_11","ATT_12","ATT_13","ATT_14"]
-runs = ["1","2","3","4","5"]
+runs = ["2","3","4","5"]
+subjs = ["ATT_11","ATT_12","ATT_13","ATT_14"]
+#subjs = ["ATT_10"]
+#runs = ["2"]
 
 subjects_dir = "/home/jeff/freesurfer/subjects/"
 proc_dir = "/media/hdd/jeff/reftest/proc/"
+
+cov = mne.read_cov("{dir}empty-cov.fif".format(dir=proc_dir))
 
 dists = []
 for sub in subjs:
@@ -14,16 +20,20 @@ for sub in subjs:
     bem = mne.read_bem_solution("{dir}nc_{sub}-bem.fif".format(
                                 dir=proc_dir,sub=sub))
     for run in runs:
-        raw = mne.io.Raw("{dir}nc_{sub}_{run}_hand_ica-raw.fif".format(
+        raw = mne.io.Raw("{dir}{sub}_{run}_ica-raw.fif".format(
                          dir=proc_dir,sub=sub,run=run),preload=True)
-        stc = mne.read_source_estimate("{dir}nc_{sub}_{run}".format(dir=proc_dir,sub=sub,run=run))
+        raw.interpolate_bads()
+        stc_master = mne.read_source_estimate("{dir}nc_{sub}_{run}".format(dir=proc_dir,sub=sub,run=run))
+        stc_master *= 4
         in_source = mne.read_source_spaces("{dir}nc_{sub}-src.fif".format(dir=proc_dir,
                                            sub=sub,run=run))
-        for n_idx in range(40):
+        for n_idx in range(50):
+            stc = stc_master.copy()
             with open("{dir}const_{n}".format(dir=proc_dir,n=n_idx),"rb") as f:
                 constellation = pickle.load(f)
             pos = constellation["pos"]
             signal = constellation["signal"]
+            #signal = np.zeros(signal.shape)
             sphere = (0,0,0,np.max(np.linalg.norm(pos["rr"],axis=1)))
             out_source = mne.setup_volume_source_space(subject="nc_"+sub,
                                                        pos=pos,sphere=sphere,
@@ -41,8 +51,12 @@ for sub in subjs:
             vertices = [np.arange(len(signal))]+stc.vertices
             all_stc = mne.MixedSourceEstimate(all_data,vertices=vertices,tstep=stc._tstep,tmin=0)
             raw_s = mne.simulation.simulate_raw(raw,all_stc,trans=None,src=None,bem=None,forward=fwd,cov=None,n_jobs=8,ref_meg=True)
+            mne.simulation.add_noise(raw_s,cov)
             raw_s.save("{dir}nc_{sub}_{run}_{n}_sim-raw.fif".format(
                              dir=proc_dir,sub=sub,run=run,n=n_idx),overwrite=True)
+            sraw = mne.io.RawArray(signal,mne.create_info(len(signal),200,ch_types="misc"))
+            #sraw.plot(scalings="auto",n_channels=len(sraw.ch_names))
+            #raw_s.plot()
 
 
 
