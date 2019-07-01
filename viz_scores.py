@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 
 
 proc_dir = "/home/jeff/reftest/proc/"
-with open(proc_dir+"perform_2.5","rb") as f:
+with open(proc_dir+"perform_3","rb") as f:
     scores = pickle.load(f)
 toviz = ["hits","misses","false_alarms"]
 #toviz = ["misses"]
