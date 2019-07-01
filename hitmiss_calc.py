@@ -10,6 +10,7 @@ runs = ["2","3","4","5"]
 # runs = ["3"]
 n_num = (0,50)
 threshes = [1,1.5,2,2.5,3,3.5,4]
+threshes = [2.5]
 
 for thresh in threshes:
     threshold = thresh
