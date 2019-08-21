@@ -16,7 +16,7 @@ def pearr(comps,gnds,thresh):
             if p < thresh:
                 comp_inds.append(c)
         rs.append(this_rs)
-    return list(set(comp_inds)), rs
+    return np.array(list(set(comp_inds))), np.array(rs)
 
 
 proc_dir = "/home/jeff/reftest/proc/"
