@@ -69,7 +69,7 @@ for thresh in threshes:
                 temp_hits = list(set(inds) & set(gnd_inds))
                 temp_misses = list(set(gnd_inds) - set(inds))
                 temp_false_alarms = list(set(inds) - set(gnd_inds))
-                temp_silent = [gnd_idx if not np.where(gnd[:ica_cutoff]>gnd_thresh)[0].size else None for gnd_idx,gnd in enumerate(gnd_scores)]
+                temp_silent = gnd_inds
                 for sil in temp_silent:
                     if sil is None:
                         continue
