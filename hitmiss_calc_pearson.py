@@ -7,13 +7,16 @@ from scipy.stats import pearsonr
 
 def pearr(comps,gnds,thresh):
     comp_inds = []
+    rs = []
     for c in range(len(comps)):
+        this_rs = []
         for g in range(len(gnds)):
             r,p = pearsonr(comps[c,],gnds[g,])
+            this_rs.append(r)
             if p < thresh:
                 comp_inds.append(c)
-                break
-    return comp_inds
+        rs.append(this_rs)
+    return list(set(comp_inds)), rs
 
 
 proc_dir = "/home/jeff/reftest/proc/"
@@ -65,7 +68,7 @@ for thresh in threshes:
                     signal = signal[:,:len(raw)]
                 comps = ica.get_sources(raw).get_data()
                 gnd_inds = pearr(comps,signal,gnd_thresh)
-                gnd_inds = list(filter(lambda gnd_idx: gnd_idx<ica_cutoff, gnd_inds))
+                gnd_inds, gnd_scores = list(filter(lambda gnd_idx: gnd_idx<ica_cutoff, gnd_inds))
                 temp_hits = list(set(inds) & set(gnd_inds))
                 temp_misses = list(set(gnd_inds) - set(inds))
                 temp_false_alarms = list(set(inds) - set(gnd_inds))
