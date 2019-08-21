@@ -3,6 +3,18 @@ import pickle
 import numpy as np
 from compensate import compensate
 import time
+from scipy.stats import pearsonr
+
+def pearr(comps,gnds,thresh):
+    comp_inds = []
+    for c in range(len(comps)):
+        for g in range(len(gnds)):
+            r,p = pearsonr(comps[c,],gnds[g,])
+            if p < thresh:
+                comp_inds.append(c)
+                break
+    return comp_inds
+
 
 proc_dir = "/home/jeff/reftest/proc/"
 subjs = ["ATT_10","ATT_11","ATT_12","ATT_13","ATT_14"]
@@ -13,7 +25,7 @@ n_num = (0,50)
 threshes = [.2,.3,.4,.5,.6,.7,.8,.9]
 z_threshes = [1,1.5,2,2.5,3,3.5,4]
 #z_threshes = [1]
-gnd_thresh = 0.2
+gnd_thresh = 0.05
 separate = True
 ica_cutoff = 300
 if not separate:
@@ -39,8 +51,9 @@ for thresh in threshes:
                     ref_src = ref_ica.get_sources(raw)
                     for ch_idx,ch in enumerate(ref_src.ch_names):
                         ref_src.rename_channels({ch:"REF_ICA"+str(ch_idx)})
-                    raw.add_channels([ref_src])
-                    inds,scores = ica.find_bads_ref(raw,method="separate",
+                    raw_s = raw.copy()
+                    raw_s.add_channels([ref_src])
+                    inds,scores = ica.find_bads_ref(raw_s,method="separate",
                                                     bad_measure="cor",
                                                     threshold=threshold)
                 else:
@@ -50,7 +63,8 @@ for thresh in threshes:
                     raw.crop(tmax=signal.shape[1])
                 else:
                     signal = signal[:,:len(raw)]
-                
+                comps = ica.get_sources(raw).get_data()
+                gnd_inds = pearr(comps,signal,gnd_thresh)
                 gnd_inds = list(filter(lambda gnd_idx: gnd_idx<ica_cutoff, gnd_inds))
                 temp_hits = list(set(inds) & set(gnd_inds))
                 temp_misses = list(set(gnd_inds) - set(inds))
@@ -92,8 +106,8 @@ for thresh in threshes:
                 len(hits["rr"]),len(misses["rr"]),len(false_alarms["rr"]),len(silents["rr"])))
 
     if separate:
-        with open(proc_dir+"perform_sep_{}_gnd{}_{}".format(thresh,gnd_thresh,ica_cutoff),"wb") as f:
+        with open(proc_dir+"perform_sep_{}_p{}_{}".format(thresh,gnd_thresh,ica_cutoff),"wb") as f:
             pickle.dump({"hits":hits,"misses":misses,"false_alarms":false_alarms,"silents":silents},f)
     else:
-        with open(proc_dir+"perform_{}_{}_{}".format(thresh,gnd_thresh,ica_cutoff),"wb") as f:
+        with open(proc_dir+"perform_{}_p{}_{}".format(thresh,gnd_thresh,ica_cutoff),"wb") as f:
             pickle.dump({"hits":hits,"misses":misses,"false_alarms":false_alarms,"silents":silents},f)
