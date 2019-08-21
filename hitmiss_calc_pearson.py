@@ -50,14 +50,7 @@ for thresh in threshes:
                     raw.crop(tmax=signal.shape[1])
                 else:
                     signal = signal[:,:len(raw)]
-                sraw = mne.io.RawArray(signal,mne.create_info(len(signal),200,ch_types="misc"))
-                for ch_idx,ch in enumerate(sraw.ch_names):
-                    sraw.rename_channels({ch:"SRC"+str(ch_idx)})
-                raw.add_channels([sraw],force_update_info=True)
-                gnd_inds,gnd_scores = ica.find_bads_ref(raw,ch_name=sraw.ch_names,
-                                                        method="separate",
-                                                        bad_measure="cor",
-                                                        threshold=gnd_thresh)
+                
                 gnd_inds = list(filter(lambda gnd_idx: gnd_idx<ica_cutoff, gnd_inds))
                 temp_hits = list(set(inds) & set(gnd_inds))
                 temp_misses = list(set(gnd_inds) - set(inds))

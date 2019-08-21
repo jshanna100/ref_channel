@@ -52,8 +52,8 @@ for sub in subjs:
             all_stc = mne.MixedSourceEstimate(all_data,vertices=vertices,tstep=stc._tstep,tmin=0)
             raw_s = mne.simulation.simulate_raw(raw,all_stc,trans=None,src=None,bem=None,forward=fwd,cov=None,n_jobs=8,ref_meg=True)
             mne.simulation.add_noise(raw_s,cov)
-            raw_s.save("{dir}nc_{sub}_{run}_{n}_sim-raw.fif".format(
-                             dir=proc_dir,sub=sub,run=run,n=n_idx),overwrite=True)
+            # raw_s.save("{dir}nc_{sub}_{run}_{n}_sim-raw.fif".format(
+            #                  dir=proc_dir,sub=sub,run=run,n=n_idx),overwrite=True)
             sraw = mne.io.RawArray(signal,mne.create_info(len(signal),200,ch_types="misc"))
             #sraw.plot(scalings="auto",n_channels=len(sraw.ch_names))
             #raw_s.plot()
