@@ -14,7 +14,7 @@ threshes = [.2,.3,.4,.5,.6,.7,.8,.9]
 z_threshes = [1,1.5,2,2.5,3,3.5,4]
 #z_threshes = [1]
 gnd_thresh = 0.2
-separate = True
+separate = False
 ica_cutoff = 300
 if not separate:
     threshes=z_threshes

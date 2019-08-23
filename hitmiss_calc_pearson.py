@@ -4,6 +4,7 @@ import numpy as np
 from compensate import compensate
 import time
 from scipy.stats import pearsonr
+from mne.preprocessing.bads import find_outliers
 
 def pearr(comps,gnds,thresh):
     comp_inds = []
@@ -31,8 +32,7 @@ runs = ["2","3","4","5"]
 n_num = (0,50)
 threshes = [.2,.3,.4,.5,.6,.7,.8,.9]
 z_threshes = [1,1.5,2,2.5,3,3.5,4]
-#z_threshes = [1]
-gnd_thresh = 0.05
+gnd_thresh = 3
 separate = True
 ica_cutoff = 300
 if not separate:
@@ -70,21 +70,24 @@ for thresh in threshes:
                     raw.crop(tmax=signal.shape[1])
                 else:
                     signal = signal[:,:len(raw)]
-                comps = ica.get_sources(raw).get_data()
-                gnd_inds, gnd_scores, gnd_ps = pearr(comps,signal,gnd_thresh)
+                sraw = mne.io.RawArray(signal,mne.create_info(len(signal),200,ch_types="misc"))
+                for ch_idx,ch in enumerate(sraw.ch_names):
+                    sraw.rename_channels({ch:"SRC"+str(ch_idx)})
+                raw.add_channels([sraw],force_update_info=True)
+                gnd_inds,gnd_scores = ica.find_bads_ref(raw,ch_name=sraw.ch_names,
+                                                        method="separate",
+                                                        threshold=gnd_thresh)
                 gnd_inds = list(filter(lambda gnd_idx: gnd_idx<ica_cutoff, gnd_inds))
                 temp_hits = list(set(inds) & set(gnd_inds))
                 temp_misses = list(set(gnd_inds) - set(inds))
                 temp_false_alarms = list(set(inds) - set(gnd_inds))
-                temp_silent = gnd_inds
-                for sil in temp_silent:
-                    if sil is None:
-                        continue
-                    silents["rr"].append(constellation["pos"]["rr"][sil])
-                    silents["nn"].append(constellation["pos"]["nn"][sil])
-                    silents["src_inds"].append(constellation["src_inds"][sil])
-                    silents["subj_run"].append((sub,run,n_idx))
-                    silents["cor"].append(gnd_scores[sil].max())
+                for scores_idx,scores in enumerate(gnd_scores):
+                    if find_outliers(scores,gnd_thresh).size != 0:
+                        silents["rr"].append(constellation["pos"]["rr"][scores_idx])
+                        silents["nn"].append(constellation["pos"]["nn"][scores_idx])
+                        silents["src_inds"].append(constellation["src_inds"][scores_idx])
+                        silents["subj_run"].append((sub,run,n_idx))
+                        silents["cor"].append(np.abs(gnd_scores[scores_idx]).max())
                 for comp in temp_hits:
                     gnd_idx = np.argmax([abs(x[comp]) for x in gnd_scores])
                     hits["rr"].append(constellation["pos"]["rr"][gnd_idx])
