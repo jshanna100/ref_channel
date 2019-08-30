@@ -4,9 +4,9 @@ from mne.viz.backends.renderer import _Renderer
 from mayavi import mlab
 
 subjects_dir = "/home/jeff/freesurfer/subjects"
-subject = "reftest"
+subject = "fsaverage"
 surface = "white"
-rawfile = "/home/jeff/ATT_dat/proc/nc_ATT_10_1_hand_ica-raw.fif"
+rawfile = "/home/jeff/ATT_dat/proc/nc_ATT_10_1_p_hand_ica-raw.fif"
 raw = mne.io.Raw(rawfile)
 
 #renderer = _Renderer(bgcolor=(0, 0, 0), size=(800, 800))

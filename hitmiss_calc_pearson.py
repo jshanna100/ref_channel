@@ -31,12 +31,13 @@ runs = ["2","3","4","5"]
 # runs = ["3"]
 n_num = (0,50)
 threshes = [.2,.3,.4,.5,.6,.7,.8,.9]
-z_threshes = [1,1.5,2,2.5,3,3.5,4]
+z_threshes = [2.5,3,3.5,4]
 gnd_thresh = 3
 separate = True
-ica_cutoff = 300
+ica_cutoff = 100
 if not separate:
     threshes=z_threshes
+threshes=z_threshes
 for thresh in threshes:
     threshold = thresh
     hits = {"rr":[],"nn":[],"src_inds":[],"subj_run":[],"comp":[],"cor":[]}
@@ -61,7 +62,6 @@ for thresh in threshes:
                     raw_s = raw.copy()
                     raw_s.add_channels([ref_src])
                     inds,scores = ica.find_bads_ref(raw_s,method="separate",
-                                                    bad_measure="cor",
                                                     threshold=threshold)
                 else:
                     inds,scores = ica.find_bads_ref(raw,threshold=thresh)
@@ -82,7 +82,7 @@ for thresh in threshes:
                 temp_misses = list(set(gnd_inds) - set(inds))
                 temp_false_alarms = list(set(inds) - set(gnd_inds))
                 for scores_idx,scores in enumerate(gnd_scores):
-                    if find_outliers(scores,gnd_thresh).size != 0:
+                    if find_outliers(scores,gnd_thresh).size == 0:
                         silents["rr"].append(constellation["pos"]["rr"][scores_idx])
                         silents["nn"].append(constellation["pos"]["nn"][scores_idx])
                         silents["src_inds"].append(constellation["src_inds"][scores_idx])
@@ -116,8 +116,8 @@ for thresh in threshes:
                 len(hits["rr"]),len(misses["rr"]),len(false_alarms["rr"]),len(silents["rr"])))
 
     if separate:
-        with open(proc_dir+"perform_sep_{}_p{}_{}".format(thresh,gnd_thresh,ica_cutoff),"wb") as f:
+        with open(proc_dir+"perform_itr_sep_{}_gndz{}_ica{}".format(thresh,gnd_thresh,ica_cutoff),"wb") as f:
             pickle.dump({"hits":hits,"misses":misses,"false_alarms":false_alarms,"silents":silents},f)
     else:
-        with open(proc_dir+"perform_{}_p{}_{}".format(thresh,gnd_thresh,ica_cutoff),"wb") as f:
+        with open(proc_dir+"perform_itr_{}_gndz{}_ica{}".format(thresh,gnd_thresh,ica_cutoff),"wb") as f:
             pickle.dump({"hits":hits,"misses":misses,"false_alarms":false_alarms,"silents":silents},f)

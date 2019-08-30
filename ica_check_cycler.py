@@ -13,7 +13,7 @@ plt.ion()
 base_dir ="/media/hdd/jeff/reftest/"
 proc_dir = base_dir+"proc/"
 subjs = ["ATT_10","ATT_11","ATT_12","ATT_13","ATT_14"]
-subjs = ["ATT_14"]
+#subjs = ["ATT_14"]
 runs = ["2","3","4","5"]
 runs=["2"]
 

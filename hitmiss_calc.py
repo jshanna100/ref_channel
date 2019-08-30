@@ -11,13 +11,14 @@ runs = ["2","3","4","5"]
 # runs = ["3"]
 n_num = (0,50)
 threshes = [.2,.3,.4,.5,.6,.7,.8,.9]
-z_threshes = [1,1.5,2,2.5,3,3.5,4]
+z_threshes = [2.5,3,3.5,4]
 #z_threshes = [1]
-gnd_thresh = 0.2
+gnd_thresh = 0.3
 separate = False
-ica_cutoff = 300
+ica_cutoff = 100
 if not separate:
     threshes=z_threshes
+threshes=z_threshes
 for thresh in threshes:
     threshold = thresh
     hits = {"rr":[],"nn":[],"src_inds":[],"subj_run":[],"comp":[],"cor":[]}
@@ -41,7 +42,6 @@ for thresh in threshes:
                         ref_src.rename_channels({ch:"REF_ICA"+str(ch_idx)})
                     raw.add_channels([ref_src])
                     inds,scores = ica.find_bads_ref(raw,method="separate",
-                                                    bad_measure="cor",
                                                     threshold=threshold)
                 else:
                     inds,scores = ica.find_bads_ref(raw,threshold=thresh)
@@ -99,8 +99,8 @@ for thresh in threshes:
                 len(hits["rr"]),len(misses["rr"]),len(false_alarms["rr"]),len(silents["rr"])))
 
     if separate:
-        with open(proc_dir+"perform_sep_{}_gnd{}_{}".format(thresh,gnd_thresh,ica_cutoff),"wb") as f:
+        with open(proc_dir+"perform_sep_{}_gnd{}_ica{}".format(thresh,gnd_thresh,ica_cutoff),"wb") as f:
             pickle.dump({"hits":hits,"misses":misses,"false_alarms":false_alarms,"silents":silents},f)
     else:
-        with open(proc_dir+"perform_{}_{}_{}".format(thresh,gnd_thresh,ica_cutoff),"wb") as f:
+        with open(proc_dir+"perform_{}_gnd{}_ica{}".format(thresh,gnd_thresh,ica_cutoff),"wb") as f:
             pickle.dump({"hits":hits,"misses":misses,"false_alarms":false_alarms,"silents":silents},f)

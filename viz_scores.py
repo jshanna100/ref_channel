@@ -6,12 +6,13 @@ import numpy as np
 
 
 proc_dir = "/home/jeff/reftest/proc/"
-with open(proc_dir+"perform_0.5_2.8","rb") as f:
+with open(proc_dir+"perform_sep_0.5_p3_300","rb") as f:
     scores = pickle.load(f)
 toviz = ["hits","misses","false_alarms","silents"]
+toviz = ["hits","misses","false_alarms"]
 cols = [(1,0,0),(0,0,1),(0,1,0),(1,0,1)]
-#toviz = ["misses"]
-#cols = [(0,0,1)]
+cols = [(1,0,0),(0,0,1),(0,1,0)]
+
 
 sensor_quiv = np.array(([1,0,0],[0,1,0],[0,0,1]))
 
