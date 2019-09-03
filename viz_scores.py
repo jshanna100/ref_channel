@@ -6,7 +6,7 @@ import numpy as np
 
 
 proc_dir = "/home/jeff/reftest/proc/"
-with open(proc_dir+"perform_sep_0.5_p3_300","rb") as f:
+with open(proc_dir+"perform_itr_4_gndz3_ica100","rb") as f:
     scores = pickle.load(f)
 toviz = ["hits","misses","false_alarms","silents"]
 toviz = ["hits","misses","false_alarms"]
