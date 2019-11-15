@@ -1,74 +1,86 @@
 import mne
 import numpy as np
+from numpy.fft import rfft, irfft, rfftfreq
 import pickle
 
-def outer_source_gen(src_num,dat_len,sfreq):
-    out_data = np.empty((src_num,dat_len))
-    switcher = np.zeros((src_num,dat_len))
-    for src in range(src_num):
-        ball = np.random.random()
-        if ball < 0.3333333:
-            switcher[src,:] = 1
-        elif ball > 0.6666666:
-            start = np.random.randint(dat_len)
-            finish = np.random.randint(start+1,high=dat_len)
-            switcher[src,start:finish] = 1
-        else:
-            start = np.random.randint(dat_len-2)
-            finish = np.random.randint(start+1,high=dat_len)
-            switcher[src,start:finish] = 1
-            taper_in_finish = np.random.randint(start+1,high=finish-2)
-            taper_out_start = np.random.randint(taper_in_finish+1,high=finish)
-            switcher[src,start:taper_in_finish] = np.linspace(0,1,num=taper_in_finish-start)
-            switcher[src,taper_out_start:finish] = np.linspace(1,0,num=finish-taper_out_start)
-        freq = np.random.random()*100+0.1
-        phase = np.random.random()*2*np.pi
-        amp = np.random.normal(3e-3,scale=1e-3)
-        noise_amp = np.random.random()*5e-5+1e-5
-        out_data[src,] = np.sin(np.arange(dat_len)/sfreq*freq+phase)*amp
-        out_data[src,] += np.random.normal(0,scale=noise_amp,size=out_data[src,].shape)
-    out_data *= switcher
-    return out_data
+def msr_func(sig_len,freq_ranges,y_targs,sfreq=.005):
+    freqs = rfftfreq(sig_len,d=sfreq)
+    filtfunc = np.empty(len(freqs))
+    for fr,yt in zip(freq_ranges,y_targs):
+        freq_inds = (np.searchsorted(freqs,fr[0]),
+                     np.searchsorted(freqs,fr[1])+1)
+        logvals = np.log10(yt)
+        filtfunc[freq_inds[0]:freq_inds[1]] = np.logspace(logvals[0],logvals[1],
+                                              num=freq_inds[1]-freq_inds[0])
+        filtfunc = 1/filtfunc
+        filtfunc = filtfunc + 1j * filtfunc
+    return filtfunc
+
+def fft_filter(signal,filter):
+    f = rfft(signal)
+    f *= filter
+    filt_signal = irfft(f)
+    return filt_signal.real
 
 proc_dir = "/media/hdd/jeff/reftest/proc/"
-# harvest the ICA "sources"
-sources = []
-maxlen = 0
-subjs = ["ATT_10","ATT_11","ATT_12","ATT_13","ATT_14"]
-runs = ["2","3","4","5"]
-for sub in subjs:
-    for run in runs:
-        raw = mne.io.Raw("{dir}{sub}_{run}-raw.fif".format(dir=proc_dir,sub=sub,run=run))
-        ica = mne.preprocessing.read_ica("{dir}{sub}_{run}_ref-ica.fif".format(dir=proc_dir,sub=sub,run=run))
-        srcs = ica.get_sources(raw).get_data()
-        for s in range(len(srcs)):
-            sources.append(srcs[s,])
-            maxlen = len(srcs[s,]) if len(srcs[s,]) > maxlen else maxlen
-# put them on equal footing with regard to time
-source_array = np.zeros((len(sources),maxlen))
-for s_idx,s in enumerate(sources):
-    randstart = np.random.randint(maxlen-len(s)+1)
-    source_array[s_idx,randstart:randstart+len(s)] = s
-source_array *= 2e-3
-np.save("source_array.npy".format(dir=proc_dir),source_array)
+# # harvest the ICA "sources"
+# sources = []
+# maxlen = 0
+# subjs = ["ATT_10","ATT_11","ATT_12","ATT_13","ATT_14"]
+# runs = ["2","3","4","5"]
+# for sub in subjs:
+#     for run in runs:
+#         raw = mne.io.Raw("{dir}{sub}_{run}-raw.fif".format(dir=proc_dir,sub=sub,run=run))
+#         ica = mne.preprocessing.read_ica("{dir}{sub}_{run}_ref-ica.fif".format(dir=proc_dir,sub=sub,run=run))
+#         srcs = ica.get_sources(raw).get_data()
+#         for s in range(len(srcs)):
+#             sources.append(srcs[s,])
+#             maxlen = len(srcs[s,]) if len(srcs[s,]) > maxlen else maxlen
+# # put them on equal footing with regard to time
+# source_array = np.zeros((len(sources),maxlen))
+# for s_idx,s in enumerate(sources):
+#     randstart = np.random.randint(maxlen-len(s)+1)
+#     source_array[s_idx,randstart:randstart+len(s)] = s
+# np.save("source_array.npy".format(dir=proc_dir),source_array)
 
-src_std = 12
-src_mean = 0
-src_min = 2
-src_max = 6
-const_size = 50
+source_array = np.load("source_array.npy".format(dir=proc_dir))
+
+out_src_min = 1
+out_src_max = 4
+in_src_min = 0
+in_src_max = 2
+const_size = 100
+field_constant = 1.5e-5
+msr_filt = msr_func(source_array.shape[1],[[0,100]],[[100,100000]])
+msr_reduction = 5000
 
 for n in range(const_size):
-    src_num = np.random.randint(src_min,high=src_max)
+    in_src_num = np.random.randint(in_src_min,high=in_src_max)
+    out_src_num = np.random.randint(out_src_min,high=out_src_max)
+    src_num = in_src_num + out_src_num
     src_inds = np.random.randint(len(source_array),size=src_num)
     pos = {}
     rr = np.zeros((src_num,3))
-    while np.min(np.linalg.norm(rr,axis=1))<3:
-        rr = np.random.normal(src_mean,src_std,(src_num,3))
+    out_data = source_array[src_inds,].copy()
+    while np.min(np.linalg.norm(rr,axis=1))<0.5:
+        in_src_vec = np.random.randint(1,high=3,size=in_src_num)
+        out_src_vec = np.random.randint(5,high=500,size=out_src_num)
+        scale_by = np.diag(np.hstack((in_src_vec,out_src_vec)))
+        rr = np.dot(scale_by,np.random.random_sample(size=(src_num,3)))
+    for src_idx in range(src_num):
+        this_norm = np.linalg.norm(rr[src_idx,])
+        rand_coef = np.abs(np.random.normal(1,0.05))
+        out_data[src_idx,] *= (field_constant*rand_coef*this_norm**2)
+        if this_norm > 3:
+            orig_ssq = np.sum(out_data[src_idx,]**2)
+            out_data[src_idx,] = fft_filter(source_array[src_idx,],msr_filt)
+            after_ssq = np.sum(out_data[src_idx,]**2)
+            filtmag_coef = orig_ssq/after_ssq
+            out_data[src_idx,] *= filtmag_coef
+        else:
+            print("Source inside the MSR")
     pos["rr"] = rr
     pos["nn"] = np.random.normal(0,1,rr.shape)
-    #out_data = outer_source_gen(src_num,40000,200)
-    out_data = source_array[src_inds,]
     constellation = {"pos":pos,"signal":out_data,"src_inds":src_inds}
     with open("{dir}const_{n}".format(dir=proc_dir,n=n),"wb") as f:
         pickle.dump(constellation,f)
