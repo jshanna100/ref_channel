@@ -18,8 +18,8 @@ mri_key_i = {v:k for k,v in mri_key.items()}
 subjs = ["ATT_10","ATT_11","ATT_12","ATT_13","ATT_14"]
 runs = ["2","3","4","5"]
 subjs = ["ATT_11","ATT_12","ATT_13","ATT_14"]
-subjs = ["ATT_10"]
-runs = ["2"]
+#subjs = ["ATT_10"]
+#runs = ["2"]
 
 subjects_dir = "/home/jeff/freesurfer/subjects/"
 proc_dir = "/media/hdd/jeff/reftest/proc/"
