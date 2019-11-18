@@ -18,8 +18,8 @@ mri_key_i = {v:k for k,v in mri_key.items()}
 subjs = ["ATT_10","ATT_11","ATT_12","ATT_13","ATT_14"]
 runs = ["2","3","4","5"]
 subjs = ["ATT_11","ATT_12","ATT_13","ATT_14"]
-subjs = ["ATT_10"]
-runs = ["2"]
+#subjs = ["ATT_10"]
+#runs = ["2"]
 
 subjects_dir = "/home/jeff/freesurfer/subjects/"
 proc_dir = "/media/hdd/jeff/reftest/proc/"
@@ -72,8 +72,8 @@ for sub in subjs:
             comb_raw = in_raw.copy()
             comb_raw._data += out_raw._data
 
-            # raw_s.save("{dir}nc_{sub}_{run}_{n}_sim-raw.fif".format(
-            #            dir=proc_dir,sub=sub,run=run,n=n_idx),overwrite=True)
+            raw_s.save("{dir}nc_{sub}_{run}_{n}_sim-raw.fif".format(
+                        dir=proc_dir,sub=sub,run=run,n=n_idx),overwrite=True)
             # sraw = mne.io.RawArray(signal,mne.create_info(len(signal),200,ch_types="misc"))
 
 
