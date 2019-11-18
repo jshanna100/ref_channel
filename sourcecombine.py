@@ -72,8 +72,8 @@ for sub in subjs:
             comb_raw = in_raw.copy()
             comb_raw._data += out_raw._data
 
-            # raw_s.save("{dir}nc_{sub}_{run}_{n}_sim-raw.fif".format(
-            #            dir=proc_dir,sub=sub,run=run,n=n_idx),overwrite=True)
+            raw_s.save("{dir}nc_{sub}_{run}_{n}_sim-raw.fif".format(
+                       dir=proc_dir,sub=sub,run=run,n=n_idx),overwrite=True)
             # sraw = mne.io.RawArray(signal,mne.create_info(len(signal),200,ch_types="misc"))
 
 
