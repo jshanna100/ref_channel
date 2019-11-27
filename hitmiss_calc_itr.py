@@ -6,24 +6,6 @@ import time
 from scipy.stats import pearsonr
 from mne.preprocessing.bads import find_outliers
 
-def pearr(comps,gnds,thresh):
-    comp_inds = []
-    rs = []
-    ps = []
-    for c in range(len(comps)):
-        this_rs = []
-        this_ps = []
-        for g in range(len(gnds)):
-            r,p = pearsonr(comps[c,],gnds[g,])
-            this_rs.append(r)
-            this_ps.append(p)
-            if p < thresh:
-                comp_inds.append(c)
-        rs.append(this_rs)
-        ps.append(this_ps)
-    return np.array(list(set(comp_inds))), np.array(rs), np.array(ps)
-
-
 proc_dir = "/home/jeff/reftest/proc/"
 subjs = ["ATT_10","ATT_11","ATT_12","ATT_13","ATT_14"]
 runs = ["2","3","4","5"]

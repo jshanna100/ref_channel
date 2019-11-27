@@ -2,6 +2,9 @@ import mne
 import numpy as np
 from numpy.fft import rfft, irfft, rfftfreq
 import pickle
+import code
+import matplotlib.pyplot as plt
+plt.ion()
 
 def msr_func(sig_len,freq_ranges,y_targs,sfreq=.005):
     freqs = rfftfreq(sig_len,d=sfreq)
@@ -45,17 +48,20 @@ proc_dir = "/media/hdd/jeff/reftest/proc/"
 
 source_array = np.load("source_array.npy".format(dir=proc_dir))
 
-out_src_min = 1
+out_src_min = 2
 out_src_max = 4
 in_src_min = 0
 in_src_max = 2
 const_size = 100
-field_constant = 1.5e-5
+out_field_constant = 1e-7
+in_field_constant = 1e-7
 msr_filt = msr_func(source_array.shape[1],[[0,100]],[[100,100000]])
-msr_reduction = 5000
 
 for n in range(const_size):
-    in_src_num = np.random.randint(in_src_min,high=in_src_max)
+    if in_src_max > in_src_min:
+        in_src_num = np.random.randint(in_src_min,high=in_src_max)
+    else:
+        in_src_num = 0
     out_src_num = np.random.randint(out_src_min,high=out_src_max)
     src_num = in_src_num + out_src_num
     src_inds = np.random.randint(len(source_array),size=src_num)
@@ -67,18 +73,24 @@ for n in range(const_size):
         out_src_vec = np.random.randint(5,high=500,size=out_src_num)
         scale_by = np.diag(np.hstack((in_src_vec,out_src_vec)))
         rr = np.dot(scale_by,np.random.random_sample(size=(src_num,3)))
+    #code.interact(local=locals())
     for src_idx in range(src_num):
         this_norm = np.linalg.norm(rr[src_idx,])
-        rand_coef = np.abs(np.random.normal(1,0.05))
-        out_data[src_idx,] *= (field_constant*rand_coef*this_norm**2)
+        rand_coef = np.abs(np.random.normal(1,0.1))
         if this_norm > 3:
+            out_data[src_idx,] *= (out_field_constant*rand_coef*this_norm**3)
             orig_ssq = np.sum(out_data[src_idx,]**2)
-            out_data[src_idx,] = fft_filter(source_array[src_idx,],msr_filt)
+            out_data[src_idx,] = fft_filter(out_data[src_idx,],msr_filt)
             after_ssq = np.sum(out_data[src_idx,]**2)
             filtmag_coef = orig_ssq/after_ssq
             out_data[src_idx,] *= filtmag_coef
         else:
+            out_data[src_idx,] *= (in_field_constant*rand_coef*this_norm**3)
             print("Source inside the MSR")
+        # add a bit of noise
+        out_data[src_idx,] += np.random.normal(0,out_data[src_idx,].std()/100,
+                                               size=out_data[src_idx,].shape)
+    #code.interact(local=locals())
     pos["rr"] = rr
     pos["nn"] = np.random.normal(0,1,rr.shape)
     constellation = {"pos":pos,"signal":out_data,"src_inds":src_inds}

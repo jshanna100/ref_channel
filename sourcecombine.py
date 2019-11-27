@@ -1,9 +1,9 @@
 import mne
 import numpy as np
 import pickle
-from compensate import compensate
 from mne.forward._compute_forward import _magnetic_dipole_field_vec
 from mne.forward._make_forward import _create_meg_coils
+import code
 
 mri_key = {"KIL13":"ATT_10","ALC81":"ATT_11","EAM11":"ATT_19","ENR41":"ATT_18",
            "NAG_83":"ATT_36","PAG48":"ATT_21","SAG13":"ATT_20","HIU14":"ATT_23",
@@ -17,10 +17,6 @@ mri_key_i = {v:k for k,v in mri_key.items()}
 
 subjs = ["ATT_10","ATT_11","ATT_12","ATT_13","ATT_14"]
 runs = ["2","3","4","5"]
-subjs = ["ATT_11","ATT_12","ATT_13","ATT_14"]
-subjs = ["ATT_10"]
-#runs = ["2"]
-
 subjects_dir = "/home/jeff/freesurfer/subjects/"
 proc_dir = "/media/hdd/jeff/reftest/proc/"
 
@@ -51,7 +47,9 @@ for sub in subjs:
                                                  forward=in_fwd,n_jobs=8,
                                                  ref_meg=True)
             mne.simulation.add_noise(in_raw,cov)
-
+            # zero out the brain signal in the reference channels
+            ref_picks = mne.pick_types(in_raw.info,meg=False,ref_meg=True)
+            in_raw._data[ref_picks,] = np.zeros(in_raw._data[ref_picks,].shape)
             # external sources
             with open("{dir}const_{n}".format(dir=proc_dir,n=n_idx),"rb") as f:
                 constellation = pickle.load(f)
@@ -71,9 +69,11 @@ for sub in subjs:
             # combine
             comb_raw = in_raw.copy()
             comb_raw._data += out_raw._data
-
-            comb_raw.save("{dir}nc_{sub}_{run}_{n}_sim-raw.fif".format(
-                       dir=proc_dir,sub=sub,run=run,n=n_idx),overwrite=True)
+            code.interact(local=locals())
+            # out_raw.save("{dir}nc_{sub}_{run}_{n}_outsim-raw.fif".format(
+            #            dir=proc_dir,sub=sub,run=run,n=n_idx),overwrite=True)
+            # comb_raw.save("{dir}nc_{sub}_{run}_{n}_sim-raw.fif".format(
+            #            dir=proc_dir,sub=sub,run=run,n=n_idx),overwrite=True)
             # sraw = mne.io.RawArray(signal,mne.create_info(len(signal),200,ch_types="misc"))
 
 
@@ -100,3 +100,5 @@ for sub in subjs:
 # mesh = mlab.pipeline.triangular_mesh_source(x1, y1, z1, faces)
 # mesh.data.point_data.normals = normals
 # mlab.pipeline.surface(mesh, color=3 * (0.7,))
+
+# np.linalg.norm(constellation["pos"]["rr"],axis=1)

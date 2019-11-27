@@ -1,7 +1,7 @@
 import mne
 import numpy as np
 
-def compensate(raw,weights=None,direction=1):
+def compensate(raw,weights=None,template=None,direction=1):
     if not raw.preload:
         raw.load_data()
     if not weights:
@@ -11,8 +11,11 @@ def compensate(raw,weights=None,direction=1):
         meg_ch_names = [raw.ch_names[x] for x in meg_picks]
         ref_ch_names = [raw.ch_names[x] for x in ref_picks]
         estimator = LinearRegression(normalize=True)
-        Y_pred = estimator.fit(
-        raw[ref_picks][0].T,raw[meg_picks][0].T).predict(raw[ref_picks][0].T)
+        if template:
+            estimator.fit(template[ref_picks][0].T,template[meg_picks][0].T)
+        else:
+            estimator.fit(raw[ref_picks][0].T,raw[meg_picks][0].T)
+        Y_pred = estimator.predict(raw[ref_picks][0].T)
         raw._data[meg_picks] -= direction*Y_pred.T
         return estimator
     else:
