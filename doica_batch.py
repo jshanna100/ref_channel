@@ -13,7 +13,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--chunk', type=int, required=True)
 opt = parser.parse_args()
 
-proc_dir = "/home/v/mfnc/mfnc001h/"
+proc_dir = "/home/woody/mfnc/mfnc001h/sims"
 subjs = ["ATT_10","ATT_11","ATT_12","ATT_13","ATT_14"]
 runs = ["2","3","4","5"]
 filebases = []
