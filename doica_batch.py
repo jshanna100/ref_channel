@@ -13,8 +13,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--chunk', type=int, required=True)
 opt = parser.parse_args()
 
-base_dir ="/media/hdd/jeff/reftest/"
-proc_dir = base_dir+"proc/"
+proc_dir = "/home/v/mfnc/mfnc001h/"
 subjs = ["ATT_10","ATT_11","ATT_12","ATT_13","ATT_14"]
 runs = ["2","3","4","5"]
 filebases = []
@@ -25,7 +24,6 @@ for sub in subjs:
                                                               sub=sub,run=run,
                                                               n=n_idx))
 filebases = list(chunks(filebases,25))
-proc_dir = "/home/v/mfnc/mfnc001h/"
 ica_ranges = [20,40,60]
 
 for f_idx,filebase in enumerate(filebases[opt.chunk]):
