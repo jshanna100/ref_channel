@@ -9,6 +9,7 @@ import argparse
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--compno', type=int, default=None)
+parser.add_argument('--alg', type=str, default="separate")
 opt = parser.parse_args()
 
 proc_dir = "/home/jeff/reftest/proc/"
@@ -21,7 +22,10 @@ n_num = (0,100)
 threshes = [.2,.3,.4,.5,.6,.7,.8,.9]
 z_threshes = [2.5,3,3.5,4]
 gnd_thresh = 3
-separate = True
+if opt.alg == "separate":
+    separate = True
+else:
+    separate = False
 comp_nums = [20,40,60,80,100]
 if opt.compno:
     comp_nums = [comp_nums[opt.compno]]
