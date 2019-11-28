@@ -36,9 +36,9 @@ for cn in comp_nums:
                     signal = constellation["signal"]
                     raw = mne.io.Raw("{dir}nc_{sub}_{run}_{n}_sim-raw.fif".format(dir=proc_dir,sub=sub,run=run,n=n_idx),preload=True)
                     compensate(raw)
-                    ica = mne.preprocessing.read_ica("{dir}nc_{sub}_{run}_{n_c{cn}_sim-ica.fif".format(dir=proc_dir,sub=sub,run=run,n=n_idx,cn=cn))
+                    ica = mne.preprocessing.read_ica("{dir}nc_{sub}_{run}_{n}_c{cn}-ica.fif".format(dir=proc_dir,sub=sub,run=run,n=n_idx,cn=cn))
                     if separate:
-                        ref_ica = mne.preprocessing.read_ica("{dir}nc_{sub}_{run}_{n}_sim_ref-ica.fif".format(dir=proc_dir,sub=sub,run=run,n=n_idx))
+                        ref_ica = mne.preprocessing.read_ica("{dir}nc_{sub}_{run}_{n}_ref-ica.fif".format(dir=proc_dir,sub=sub,run=run,n=n_idx))
                         ref_src = ref_ica.get_sources(raw)
                         for ch_idx,ch in enumerate(ref_src.ch_names):
                             ref_src.rename_channels({ch:"REF_ICA"+str(ch_idx)})
@@ -48,7 +48,7 @@ for cn in comp_nums:
                                                         threshold=threshold)
                     else:
                         inds,scores = ica.find_bads_ref(raw,threshold=thresh)
-                    inds = list(filter(lambda idx: idx<ica_cutoff, inds))
+                    #inds = list(filter(lambda idx: idx<ica_cutoff, inds))
                     if len(raw) > signal.shape[1]:
                         raw.crop(tmax=signal.shape[1])
                     else:
@@ -60,7 +60,7 @@ for cn in comp_nums:
                     gnd_inds,gnd_scores = ica.find_bads_ref(raw,ch_name=sraw.ch_names,
                                                             method="separate",
                                                             threshold=gnd_thresh)
-                    gnd_inds = list(filter(lambda gnd_idx: gnd_idx<ica_cutoff, gnd_inds))
+                    #gnd_inds = list(filter(lambda gnd_idx: gnd_idx<ica_cutoff, gnd_inds))
                     temp_hits = list(set(inds) & set(gnd_inds))
                     temp_misses = list(set(gnd_inds) - set(inds))
                     temp_false_alarms = list(set(inds) - set(gnd_inds))
