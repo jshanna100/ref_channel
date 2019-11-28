@@ -5,8 +5,14 @@ from compensate import compensate
 import time
 from scipy.stats import pearsonr
 from mne.preprocessing.bads import find_outliers
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--compno', type=int, default=None)
+opt = parser.parse_args()
 
 proc_dir = "/home/jeff/reftest/proc/"
+proc_dir = "/home/woody/mfnc/mfnc001h/sims/"
 subjs = ["ATT_10","ATT_11","ATT_12","ATT_13","ATT_14"]
 runs = ["2","3","4","5"]
 # subjs = ["ATT_11"]
@@ -17,6 +23,8 @@ z_threshes = [2.5,3,3.5,4]
 gnd_thresh = 3
 separate = True
 comp_nums = [20,40,60,80,100]
+if opt.compno:
+    comp_nums = [opt.compno]
 if not separate:
     threshes=z_threshes
 threshes=z_threshes
@@ -35,7 +43,12 @@ for cn in comp_nums:
                     x2, y2, z2 = constellation["pos"]["rr"].T
                     signal = constellation["signal"]
                     raw = mne.io.Raw("{dir}nc_{sub}_{run}_{n}_sim-raw.fif".format(dir=proc_dir,sub=sub,run=run,n=n_idx),preload=True)
-                    compensate(raw)
+                    with open("{dir}nc_{sub}_{run}_{n}.est".format(dir=proc_dir,sub=sub,run=run,n=n_idx),"rb") as f:
+                        estimator = pickle.load(f)
+                    ref_picks = mne.pick_types(raw.info,meg=False,ref_meg=True)
+                    meg_picks = mne.pick_types(raw.info,meg=True,ref_meg=False)
+                    Y_pred = estimator.predict(raw[ref_picks][0].T)
+                    raw._data[meg_picks] -= Y_pred.T
                     ica = mne.preprocessing.read_ica("{dir}nc_{sub}_{run}_{n}_c{cn}-ica.fif".format(dir=proc_dir,sub=sub,run=run,n=n_idx,cn=cn))
                     if separate:
                         ref_ica = mne.preprocessing.read_ica("{dir}nc_{sub}_{run}_{n}_ref-ica.fif".format(dir=proc_dir,sub=sub,run=run,n=n_idx))

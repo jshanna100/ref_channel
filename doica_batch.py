@@ -35,7 +35,6 @@ for f_idx,filebase in enumerate(filebases[opt.chunk]):
     ref_picks = mne.pick_types(raw.info,meg=False,ref_meg=True)
     meg_picks = mne.pick_types(raw.info,meg=True,ref_meg=False)
     Y_pred = estimator.predict(raw[ref_picks][0].T)
-    oldraw = raw.copy()
     raw._data[meg_picks] -= Y_pred.T
 
     icaref = mne.preprocessing.ICA(n_components=6,max_iter=1000,
