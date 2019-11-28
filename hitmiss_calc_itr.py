@@ -11,12 +11,12 @@ subjs = ["ATT_10","ATT_11","ATT_12","ATT_13","ATT_14"]
 runs = ["2","3","4","5"]
 # subjs = ["ATT_11"]
 # runs = ["3"]
-n_num = (0,50)
+n_num = (0,100)
 threshes = [.2,.3,.4,.5,.6,.7,.8,.9]
 z_threshes = [2.5,3,3.5,4]
 gnd_thresh = 3
 separate = True
-ica_cutoff = 100
+comp_nums = [20,40,60,80,100]
 if not separate:
     threshes=z_threshes
 threshes=z_threshes
