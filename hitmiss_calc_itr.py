@@ -24,7 +24,7 @@ gnd_thresh = 3
 separate = True
 comp_nums = [20,40,60,80,100]
 if opt.compno:
-    comp_nums = [opt.compno]
+    comp_nums = [comp_nums[opt.compno]]
 if not separate:
     threshes=z_threshes
 threshes=z_threshes
