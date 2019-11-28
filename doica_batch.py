@@ -25,6 +25,7 @@ for sub in subjs:
                                                               n=n_idx))
 filebases = list(chunks(filebases,25))
 ica_ranges = [20,40,60]
+ica_ranges = [80,100]
 
 for f_idx,filebase in enumerate(filebases[opt.chunk]):
     filename = filebase+"_sim-raw.fif"
