@@ -9,11 +9,12 @@ import argparse
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--compno', type=int, default=None)
+parser.add_argument('--thresh', type=int, default=None)
 parser.add_argument('--alg', type=str, default="separate")
 opt = parser.parse_args()
 
 proc_dir = "/home/jeff/reftest/proc/"
-proc_dir = "/home/woody/mfnc/mfnc001h/sims/"
+#proc_dir = "/home/woody/mfnc/mfnc001h/sims/"
 subjs = ["ATT_10","ATT_11","ATT_12","ATT_13","ATT_14"]
 runs = ["2","3","4","5"]
 # subjs = ["ATT_11"]
@@ -21,6 +22,7 @@ runs = ["2","3","4","5"]
 n_num = (0,100)
 threshes = [.2,.3,.4,.5,.6,.7,.8,.9]
 z_threshes = [2.5,3,3.5,4]
+threshes=z_threshes
 gnd_thresh = 3
 if opt.alg == "separate":
     separate = True
@@ -29,9 +31,9 @@ else:
 comp_nums = [20,40,60,80,100]
 if opt.compno:
     comp_nums = [comp_nums[opt.compno]]
-if not separate:
-    threshes=z_threshes
-threshes=z_threshes
+if opt.thresh:
+    threshes = [threshes[opt.thresh]]
+
 for cn in comp_nums:
     for thresh in threshes:
         threshold = thresh
