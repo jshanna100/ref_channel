@@ -7,7 +7,7 @@ threshes = [.2,.3,.4,.5,.6,.7,.8,.9]
 z_threshes = [2.5,3,3.5,4]
 threshes = z_threshes
 gnd_thresh = 3
-ica_cutoff = 100
+ica_cutoff = 20
 dir = "/home/jeff/reftest/proc/"
 fs = 32
 
@@ -30,8 +30,9 @@ dists = np.linalg.norm(np.array(sep_hmcalc["hits"]["rr"]),axis=1)
 print("Hits: {},{}".format(np.mean(dists),np.std(dists)))
 dists = np.linalg.norm(np.array(sep_hmcalc["misses"]["rr"]),axis=1)
 print("Misses: {},{}".format(np.mean(dists),np.std(dists)))
-dists = np.linalg.norm(np.array(sep_hmcalc["false_alarms"]["rr"]),axis=1)
-print("False alarms: {},{}".format(np.mean(dists),np.std(dists)))
+if sep_hmcalc["false_alarms"]["rr"]:
+    dists = np.linalg.norm(np.array(sep_hmcalc["false_alarms"]["rr"]),axis=1)
+    print("False alarms: {},{}".format(np.mean(dists),np.std(dists)))
 
 axes[0].plot(acc[0,:],label="hits", linewidth=5)
 axes[0].plot(acc[1,:],label="misses", linewidth=5)
