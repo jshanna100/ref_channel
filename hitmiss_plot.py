@@ -10,7 +10,7 @@ gnd_thresh = 3
 ica_cutoffs = [20,40,60,80,100]
 dir = "/home/jeff/reftest/proc/"
 fs = 32
-distcut = 3
+distcut = 3000
 
 fig, axes = plt.subplots(2,5)
 plt.rcParams.update({'font.size': fs})
