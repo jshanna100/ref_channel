@@ -9,7 +9,7 @@ threshes = z_threshes
 gnd_thresh = 3
 ica_cutoffs = [20,40,60,80,100]
 dir = "/home/jeff/reftest/proc/"
-fs = 32
+fs = 28
 distcut = 3000
 
 fig, axes = plt.subplots(2,5)
@@ -38,11 +38,11 @@ for ica_idx,ica_cutoff in enumerate(ica_cutoffs):
     else:
         axes[0,ica_idx].set_yticklabels([])
     if ica_idx == 4:
-        axes[0,ica_idx].legend()
+        axes[0,ica_idx].legend(fontsize=18)
     if ica_idx == 2:
-        axes[0,ica_idx].set_title("{} components\nSeparate".format(ica_cutoff))
+        axes[0,ica_idx].set_title("{} components\n\nSeparate\n".format(ica_cutoff))
     else:
-        axes[0,ica_idx].set_title("{} components\n".format(ica_cutoff))
+        axes[0,ica_idx].set_title("{} components\n\n\n".format(ica_cutoff))
     axes[0,ica_idx].set_xticks(np.arange(len(threshes)))
     axes[0,ica_idx].set_xticklabels([str(x) for x in threshes], fontsize=fs)
     axes[0,ica_idx].set_ylim((0,1))
@@ -68,9 +68,9 @@ for ica_idx,ica_cutoff in enumerate(ica_cutoffs):
     axes[1,ica_idx].plot(acc[2,:],label="false alarms", linewidth=5)
     axes[1,ica_idx].set_xticks(np.arange(len(threshes)))
     axes[1,ica_idx].set_xticklabels([str(x) for x in threshes], fontsize=fs)
+    axes[1,ica_idx].set_xlabel("Z threshold", fontsize=fs)
     if ica_idx == 2:
-        axes[1,ica_idx].set_xlabel("Z threshold", fontsize=fs)
-        axes[1,ica_idx].set_title("Together")
+        axes[1,ica_idx].set_title("Together\n")
     if ica_idx == 0:
         axes[1,ica_idx].set_yticks(np.linspace(0.2,0.8,3))
         axes[1,ica_idx].set_yticklabels([str(s) for s in np.linspace(0.2,0.8,3)],
